@@ -1,0 +1,53 @@
+       /*   Program ARCHIVELIB from the NTMTOOLS library              */
+       /*   GNU General Public License v3.0                            */
+       /*   CL program to save a library into a savf incrementing the */
+       /*   suffix by 1 each time into a library that ends in SAV     */
+
+             PGM        PARM(&LIBIN)
+
+             DCL        VAR(&LIBIN) TYPE(*CHAR) LEN(10)
+             DCL        VAR(&LIBOUT) TYPE(*CHAR) LEN(10)
+             DCL        VAR(&FILEOUT) TYPE(*CHAR) LEN(10)
+             DCL        VAR(&COUNTER) TYPE(*CHAR) LEN(3)
+             DCL        VAR(&CDEC) TYPE(*DEC) LEN(3 0)
+             DCL        VAR(&MSG) TYPE(*CHAR) LEN(50)
+             DCL        VAR(&DATE) TYPE(*CHAR) LEN(6)
+
+             CHGVAR     VAR(&LIBOUT) VALUE('archivelib')
+
+             RTVJOBA    DATE(&DATE)
+
+             CRTLIB     LIB(&LIBOUT) /* library for saves */
+             monmsg     cpf2111
+
+             CRTDTAARA  DTAARA(&LIBOUT/COUNTER) TYPE(*CHAR) LEN(3) +
+                          VALUE('001') /* Counter for *savf */
+             monmsg     cpf1023
+
+             RTVDTAARA  DTAARA(&LIBOUT/COUNTER (1 3)) RTNVAR(&COUNTER)
+             CHGVAR     VAR(&FILEOUT) VALUE('ARCHIV' *TCAT &COUNTER)
+
+             CHKOBJ     OBJ(QSYS/&LIBIN) OBJTYPE(*LIB)
+             MONMSG     MSGID(CPF9801) EXEC(DO)
+                SNDUSRMSG  MSG('Library' *bcat 'doesn''t exist')
+                goto       end
+             enddo
+
+             CRTSAVF    FILE(&LIBOUT/&FILEOUT) TEXT(&libin *bcat 'Saved on +
+                          MMDDYY -> ' *CAT &DATE)
+             SAVLIB     LIB(&LIBIN) DEV(*SAVF) SAVF(&LIBOUT/&FILEOUT)
+
+             CHGVAR     VAR(&CDEC) VALUE(&COUNTER)
+             CHGVAR     VAR(&CDEC) VALUE(&CDEC + 1)
+             CHGVAR     VAR(&COUNTER) VALUE(&CDEC)
+
+             CHGDTAARA  DTAARA(&LIBOUT/COUNTER) VALUE(&COUNTER)
+
+
+ SAVMSG:
+             RCVMSG     RMV(*NO) MSG(&MSG)
+             IF         COND(&MSG ¬= ' ') THEN(DO)
+                SNDPGMMSG  MSG(&MSG)
+                GOTO       CMDLBL(SAVMSG)
+             ENDDO
+ end:        ENDPGM 
