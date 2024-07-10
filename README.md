@@ -4,3 +4,4 @@ I am always coming across library's that have been created on the system for tes
 This program creates a library and adds savf's incrementing a counter by 1 and saving the library name in the description with a saved date.
 You can also use this program to make savf backups of your regular libraries if needed.
 CL command is : archivelib (<library-name>)
+I originally had the program ask to delete the library after the save but felt that it was too dangerous to do in case someone accidentally saved a production library, so you need to manually delete the library after the save.  
